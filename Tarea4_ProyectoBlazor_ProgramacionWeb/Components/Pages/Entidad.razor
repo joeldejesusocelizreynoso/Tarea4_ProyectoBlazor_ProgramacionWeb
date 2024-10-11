@@ -1,0 +1,95 @@
+@using Microsoft.EntityFrameworkCore
+@using Tarea4_ProyectoBlazor_ProgramacionWeb.Modelos
+@page "/entidad/{Tipo}"
+@inject NavigationManager NavMan
+@rendermode InteractiveServer
+@inject SerieContext Sc
+@inject IJSRuntime JSx
+
+@* <PageTitle>Entidad</PageTitle> *@
+
+<h3 class="fw-bolder">Entidad @Tipo</h3>
+
+<div class="text-end">
+    <button type="button" class="btn btn-primary" @onclick="agregarNuevo">Agregar Nuevo</button>
+    <button type="button" class="btn btn-success" @onclick="irInicio">Página Inicio</button>
+</div>
+
+
+
+<p class="fw-bolder">DATOS AGREGADOS</p>
+
+<table class="table table-striped table-bordered mb-5 text-center">
+    <thead class="bg-secondary text-white">
+        <tr>
+            <th>Nombre</th>
+            <th>País</th>
+            <th>Idioma</th>
+            <th>Foto Url</th>
+            <th>Resumen</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in lista)
+        {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.Pais</td>
+                <td>@item.Idioma</td>
+                <td><img src="@item.FotoUrl" alt="Imagen de @item.Nombre" width="100"></td>
+                <td>@item.Resumen</td>
+                <td class="btn btn-group-sm">
+                    <button class="btn btn-success fw-bold">Editar</button>
+                    <button class="btn btn-danger fw-bold">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+
+</table>
+
+    
+@code {
+    [Parameter]
+    public string Tipo { get; set; } = "";
+
+    TipoEntidad tipoEntidad = TipoEntidad.Libro;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        switch (Tipo)
+        {
+            case "libros":
+                tipoEntidad = TipoEntidad.Libro;
+                break;
+            case "peliculas":
+                tipoEntidad = TipoEntidad.Pelicula;
+                break;
+            case "series":
+                tipoEntidad = TipoEntidad.Serie;
+                break;
+        }
+    }
+    
+    List<SeriePeliculaLibro> lista = new List<SeriePeliculaLibro>();
+
+    private void agregarNuevo()
+    {
+        NavMan.NavigateTo($"entidad/{Tipo}/editar");
+    }
+
+    private void irInicio()
+    {
+        NavMan.NavigateTo("/");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            lista = Sc.SeriePeliculaLibros.Where(x => x.Tipo == tipoEntidad).ToList();
+            StateHasChanged();
+        }
+    }
+}
